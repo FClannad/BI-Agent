@@ -22,6 +22,19 @@ export type ChatResponse = {
   chart?: unknown;
 };
 
+export type BiAskRequest = {
+  question: string;
+  sessionId?: string;
+};
+
+export type BiAskResponse = {
+  question: string;
+  text: string;
+  sql?: string | null;
+  table?: TableResult | null;
+  clarifyQuestion?: string | null;
+};
+
 export type ChatEvent = {
   type: "start" | "token" | "done";
   data: string;

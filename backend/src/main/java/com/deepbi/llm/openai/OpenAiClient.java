@@ -31,6 +31,14 @@ public class OpenAiClient implements LlmClient {
 
     @Override
     public Mono<String> chat(String userMessage) {
+        return chat(
+                "You are DeepBI, a BI assistant. Be concise.",
+                userMessage
+        );
+    }
+
+    @Override
+    public Mono<String> chat(String systemPrompt, String userMessage) {
         if (apiKey == null || apiKey.isBlank()) {
             return Mono.error(new IllegalStateException("Missing OPENAI_API_KEY (or deepbi.openai.api-key)."));
         }
@@ -38,8 +46,7 @@ public class OpenAiClient implements LlmClient {
         OpenAiChatRequest request = new OpenAiChatRequest(
                 model,
                 List.of(
-                        new OpenAiChatRequest.Message("system",
-                                "You are DeepBI, a BI assistant. Be concise. If the user asks for data, explain what SQL you would run and what chart fits."),
+                        new OpenAiChatRequest.Message("system", systemPrompt),
                         new OpenAiChatRequest.Message("user", userMessage)
                 ),
                 0.2

@@ -28,6 +28,7 @@
       />
       <div class="actions">
         <el-button type="primary" :disabled="busy || !input.trim()" @click="send()">发送</el-button>
+        <el-button type="success" :disabled="busy || !input.trim()" @click="askBi()">问数(Text→SQL)</el-button>
         <el-button :disabled="busy" @click="sendStream()">流式发送(SSE)</el-button>
         <el-button :disabled="busy" @click="clear()">清空</el-button>
       </div>
@@ -38,6 +39,7 @@
 <script setup lang="ts">
 import { reactive, ref } from "vue";
 import { chatOnce, chatStream } from "./api/chat";
+import { biAsk } from "./api/bi";
 import TableRenderer from "./components/TableRenderer.vue";
 import ChartRenderer from "./components/ChartRenderer.vue";
 import type { TextMessage, UiMessage } from "./types";
@@ -65,6 +67,33 @@ async function send() {
   try {
     const resp = await chatOnce({ message: text });
     pushAssistantText(resp.text ?? "");
+  } catch (e: any) {
+    pushAssistantText(`Error: ${e?.message ?? String(e)}`);
+  } finally {
+    busy.value = false;
+  }
+}
+
+async function askBi() {
+  const text = input.value.trim();
+  if (!text) return;
+
+  input.value = "";
+  busy.value = true;
+  pushUser(text);
+
+  try {
+    const resp = await biAsk({ question: text });
+
+    const parts: string[] = [];
+    if (resp.text) parts.push(resp.text);
+    if (resp.clarifyQuestion) parts.push(`澄清问题：${resp.clarifyQuestion}`);
+    if (resp.sql) parts.push(`SQL:\n${resp.sql}`);
+    pushAssistantText(parts.join("\n\n"));
+
+    if (resp.table) {
+      messages.push({ role: "assistant", type: "table", table: resp.table });
+    }
   } catch (e: any) {
     pushAssistantText(`Error: ${e?.message ?? String(e)}`);
   } finally {

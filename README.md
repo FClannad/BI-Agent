@@ -29,6 +29,7 @@ mvn spring-boot:run
 - `GET /health`
 - `POST /api/chat`
 - `GET /api/chat/stream?message=...`（SSE）
+- `POST /api/bi/ask`（Text-to-SQL：生成 SQL → 安全校验 → 查询 MySQL → 返回表格）
 - `GET /api/sql/query?q=SELECT...`（调试用，受只读策略限制）
 
 ### 2) 前端（Vue 3 + Vite + Element Plus + ECharts）
@@ -44,6 +45,7 @@ npm run dev
 说明：
 - 默认通过 Vite 代理把 `/api` 转发到 `http://localhost:8080`
 - “流式发送(SSE)” 会调用后端的 `/api/chat/stream`
+- “问数(Text→SQL)” 会调用后端的 `/api/bi/ask`
 
 ## 计划实现（MVP → 迭代）
 - M1：Text-to-SQL → SQL 校验 → MySQL 查询 → 表格展示

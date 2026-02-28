@@ -4,6 +4,8 @@ import com.deepbi.sql.SqlExecutor;
 import com.deepbi.web.dto.TableResult;
 import jakarta.validation.constraints.NotBlank;
 import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 @RestController
 @RequestMapping("/api/sql")
@@ -15,13 +17,14 @@ public class SqlController {
     }
 
     @PostMapping("/query")
-    public TableResult query(@RequestBody String sql) {
-        return sqlExecutor.query(sql);
+    public Mono<TableResult> query(@RequestBody String sql) {
+        return Mono.fromCallable(() -> sqlExecutor.query(sql))
+                .subscribeOn(Schedulers.boundedElastic());
     }
 
     @GetMapping("/query")
-    public TableResult queryGet(@RequestParam("q") @NotBlank String sql) {
-        return sqlExecutor.query(sql);
+    public Mono<TableResult> queryGet(@RequestParam("q") @NotBlank String sql) {
+        return Mono.fromCallable(() -> sqlExecutor.query(sql))
+                .subscribeOn(Schedulers.boundedElastic());
     }
 }
-
